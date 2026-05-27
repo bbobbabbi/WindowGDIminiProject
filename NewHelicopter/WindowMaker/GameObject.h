@@ -87,8 +87,8 @@ public:
     GameObject(ObjectType type) : GameObjectBase(type) {}
     ~GameObject() override;
 
-    void Update(float deltaTime) override;
-    void Render(MyRender& render) override;
+    virtual void Update(float deltaTime) override;
+    virtual void Render(MyRender& render) override;
 
     learning::Collider* GetCollider()override;
 

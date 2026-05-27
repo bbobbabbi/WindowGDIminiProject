@@ -10,11 +10,14 @@ class Player : public GameObject{
 public: 
     Player(const GameObject&) = delete;
     Player(ObjectType type) : GameObject(type) {}
-    ~Player() override {};
+    ~Player() override;
     learning::Vector2f GetUpDir();
+    void Update(float deltaTime);
+    void Render(MyRender& render) override;
     void Move(float deltaTime) override;
     void Accelat(float deltaTime);
     void DeAccelat(float deltaTime);
+    void SetDetector(float radius);
 private:
     learning::Vector2f UpDir;
     float accel=0;
@@ -23,5 +26,6 @@ private:
     const float MaxAccel= 0.001f;
     const float Gravity= 0.0005f;
     float m_verticalSpeed = 0.0f;
+    learning::ColliderCircle* detector = nullptr;
 };
 

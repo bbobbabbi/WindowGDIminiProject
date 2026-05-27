@@ -59,7 +59,7 @@ bool OiiAGame::Initialize()
     pNewObject->SetSpeed(1.0f); // 일단, 임의로 설정   
 
     pNewObject->SetColliderBox(100.0f, 30.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
-
+    pNewObject->platfCol = dynamic_cast<learning::ColliderBox*>(pNewObject->GetCollider());
     int i = 0;
     while (++i < MAX_GAME_OBJECT_COUNT) //0번째는 언제나 플레이어!
     {
@@ -173,7 +173,7 @@ void OiiAGame::FixedUpdate()
     //UpdateEnemyInfo();
     if (m_CirEnemySpawnPos.x != 0 && m_CirEnemySpawnPos.y != 0)
     {
-        CreateCircleEnemy();
+       // CreateCircleEnemy();
     }
     else if (m_platformSpawnPos.x != 0 && m_platformSpawnPos.y != 0) {
         CreatePlatform();
@@ -206,7 +206,7 @@ void OiiAGame::CreatePlayer()
 {
     assert(m_GameObjectPtrTable[0] == nullptr && "Player object already exists!");
 
-    GameObject* pNewObject = new Player(ObjectType::PLAYER);
+    Player* pNewObject = new Player(ObjectType::PLAYER);
 
     pNewObject->SetName("Player");
     
@@ -215,80 +215,12 @@ void OiiAGame::CreatePlayer()
     pNewObject->SetPosition(x, y+200); // 일단, 임의로 설정 
     pNewObject->SetSpeed(0.0f); // 일단, 임의로 설정   
 
-    pNewObject->SetColliderBox(50.0f,50.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
-
+    pNewObject->SetColliderBox(60.0f,40.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
+    pNewObject->SetDetector(300);
     m_GameObjectPtrTable[0] = pNewObject;
 }
 
 
-void OiiAGame::CreateCircleEnemy()
-{
-    GameObject* pNewObject = new GameObject(ObjectType::ENEMY);
-
-    pNewObject->SetName("Enemy");
-
-    float x = m_CirEnemySpawnPos.x;
-    float y = m_CirEnemySpawnPos.y;
-
-    m_CirEnemySpawnPos = { 0, 0 };
-
-    pNewObject->SetPosition(x, y);
-    pNewObject->SetSpeed(1.0f); // 일단, 임의로 설정   
-
-    pNewObject->SetColliderCircle(50.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
-
-    bool isInter = false;
-
-    learning::Collider* thisCollider = nullptr;
-
-    Vector2f firstDir;
-
-    //충돌 처리
-    int j = 0;
-    int t = 0;
-
-    while (j < MAX_GAME_OBJECT_COUNT) {
-        thisCollider = pNewObject->GetCollider();
-        GameObjectBase* target = m_GameObjectPtrTable[j];
-        if (target == nullptr) break;
-
-        learning::Collider* targetCollider = target->GetCollider();
-
-        if (thisCollider->IsIntersect(targetCollider)) {
-            // 그리는 위치 업데이트
-            OiiAGame::SettingCirPos(thisCollider, targetCollider, pNewObject);
-            j = 0;
-            ++t;
-            //판정상 무한루프를 빠질 때가 있어서 그것 처리
-            if (t == MAX_GAME_OBJECT_COUNT) {
-                isInter = true;
-                break;
-            }
-            continue;
-        }
-        ++j;
-    }
-
-
-    int i = 0;
-    while (++i < MAX_GAME_OBJECT_COUNT && !isInter) //0번째는 언제나 플레이어!
-    {
-        if (nullptr == m_GameObjectPtrTable[i])
-        {
-            m_GameObjectPtrTable[i] = pNewObject;
-            break;
-        }
-    }
-
-    if (i == MAX_GAME_OBJECT_COUNT || isInter)
-    {
-        // 게임 오브젝트 테이블이 가득 찼습니다.
-        delete pNewObject;
-        pNewObject = nullptr;
-        isInter = false;
-    }
-
-}
 
 void OiiAGame::CreatePlatform()
 {
@@ -304,7 +236,7 @@ void OiiAGame::CreatePlatform()
     pNewObject->SetSpeed(1.0f); // 일단, 임의로 설정   
 
     pNewObject->SetColliderBox(100.0f, 30.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
-
+    pNewObject->platfCol = dynamic_cast<learning::ColliderBox*>(pNewObject->GetCollider());
     int i = 0;
     while (++i < MAX_GAME_OBJECT_COUNT) //0번째는 언제나 플레이어!
     {
@@ -326,19 +258,6 @@ void OiiAGame::CreatePlatform()
 
 
 
-void OiiAGame::SettingCirPos(learning::Collider* thisCir, learning::Collider* targetCir, GameObject* pThis) {
-    auto a = dynamic_cast<ColliderCircle*>(thisCir);
-    float radius = a->radius;
-    Vector2f thisPos = thisCir->center;
-    Vector2f targetPos = targetCir->center;
-    Vector2f dir = thisPos - targetPos;
-    float x = targetCir->center.x;
-    float y = targetCir->center.y;
-    //0.5f는 float 계산으로 생기는 오차 때문에 온전하게 밀어주는 길이가 radius * 2 가 되질 않아 더해준다.
-    thisCir->center += dir.Normalized() * ((radius * 2 + 0.5f) * (1 - (dir.Length() / (radius * 2))));
-    pThis->SetPosition(thisCir->center.x, thisCir->center.y);
-}
-
 Vector2f OiiAGame::GetBoxDir(learning::Collider* thisBox, learning::Collider* targetBox) {
     auto a = dynamic_cast<ColliderBox*>(thisBox);
     float boxSize = a->halfSize.x * 2;
@@ -347,28 +266,6 @@ Vector2f OiiAGame::GetBoxDir(learning::Collider* thisBox, learning::Collider* ta
     Vector2f dir = thisPos - targetPos;
     return dir.Normalized();
 }
-
-void OiiAGame::SettingBoxPos(learning::Collider* thisBox, learning::Collider* targetBox, GameObject* pThis, Vector2f firstDir) {
-    auto a = dynamic_cast<ColliderBox*>(thisBox);
-    float boxSize = a->halfSize.x * 2;
-    Vector2f thisPos = thisBox->center;
-    Vector2f targetPos = targetBox->center;
-    Vector2f dir = thisPos - targetPos;
-    float mScala = dir.Length();
-    float x = targetBox->center.x;
-    float y = targetBox->center.y;
-    thisBox->center += firstDir * ((boxSize * 1.41f) * (1 - (mScala / (boxSize * 1.41f))));
-    thisBox->center.x = FClamp(thisBox->center.x, x - boxSize, x + boxSize);
-    thisBox->center.y = FClamp(thisBox->center.y, y - boxSize, y + boxSize);
-    pThis->SetPosition(thisBox->center.x, thisBox->center.y);
-}
-
-float OiiAGame::FClamp(float value, float min, float max)
-{
-    if (value < min) return min;
-    if (value > max) return max;
-    return value;
-};
 
 void OiiAGame::UpdateWholeIntersect() {
     static Player* pPlayer = GetPlayer();
@@ -393,17 +290,17 @@ void OiiAGame::UpdateWholeIntersect() {
         Platform* tempPlatform = dynamic_cast<Platform*>(target);
         //Enemy* tempEnemy = dynamic_cast<Enemy*>(target);
 
+        //충돌한게 플랫폼일 때 
         if (playerCollider->IsIntersect(targetCollider)) {
             if (tempPlatform != nullptr) {
                 playerCollider->isPlayerIntersect = true;
                 targetCollider->isPlayerIntersect = true;
+                //플랫폼에 플레이어 정보 넘기기
                 tempPlatform->bumpedPlayer = pPlayer;
+                tempPlatform->playerfCol = dynamic_cast<learning::ColliderBox*>(pPlayer->GetCollider());
             }
         }
-     
         //else if(tempEnemy != nullptr){}
-
-
         tempPlatform = nullptr;
         ++j;
     }

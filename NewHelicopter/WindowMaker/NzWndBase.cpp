@@ -49,18 +49,24 @@ bool NzWndBase::Create(const wchar_t* className, const wchar_t* windowName, int 
 
 		if (0 == classId) return false;
 	}
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-	m_width = width;
-	m_height = height;
+	m_width = screenWidth / 3;
+	m_height = screenHeight/1.2f;
 
-	RECT rc = { 0, 0, width, height };
+	int posX = (screenWidth - m_width) / 2;
+	int posY = (screenHeight - m_height) / 2;
+
+
+	RECT rc = { 0, 0, m_width, m_height };
 	//AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, false);
 	//[2025-04-22] 리사이즈/최대화 막음
 	AdjustWindowRect(&rc,
 		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, FALSE);
 
 	//[CHECK] AdjustWindowRect()의 의미는?
-	m_hWnd = CreateWindowEx(NULL, MAKEINTATOM(classId), L"", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+	m_hWnd = CreateWindowEx(NULL, MAKEINTATOM(classId), L"", WS_OVERLAPPEDWINDOW, posX, posY,
 		rc.right - rc.left, rc.bottom - rc.top, HWND(), HMENU(), HINSTANCE(), NULL);
 
 

@@ -28,7 +28,6 @@ public:
     void Run();
     void Finalize();
 
-    static float FClamp(float value, float min, float max);
 
 private:
     void Update();
@@ -47,15 +46,12 @@ private:
     void LogicUpdate();
 
     void CreatePlayer();
-    void CreateCircleEnemy();
     void CreatePlatform();
     void UpdatePlayerInfo();
     //void UpdateEnemyInfo();
     void UpdateWholeIntersect();
 
-    void SettingBoxPos(learning::Collider* thisBox, learning::Collider* targetBox, GameObject* pThis, learning::Vector2f firstDir);
     learning::Vector2f GetBoxDir(learning::Collider* thisBox, learning::Collider* targetBox);
-    void SettingCirPos(learning::Collider* thisCir, learning::Collider* targetCir, GameObject* pThis);
 
     Player* GetPlayer() const { return (Player*)m_GameObjectPtrTable[0]; }
 

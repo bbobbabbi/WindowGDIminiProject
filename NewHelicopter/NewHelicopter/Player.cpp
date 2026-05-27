@@ -2,7 +2,9 @@
 #include "GameObject.h"
 #include "Player.h"
 #include "Utillity.h"
+#include "MyRender.h"
 #include <iostream>
+
 
 learning::Vector2f Player::GetUpDir(){
 	
@@ -24,6 +26,19 @@ void Player::Move(float deltaTime) {
 	m_pos += m_dir * distance;
 }
 
+void Player::Update(float deltaTime)
+{
+	Move(deltaTime);
+
+	if (myCollider)
+	{
+		myCollider->center = m_pos;
+	}
+	if (detector) {
+		detector->center = m_pos;
+	}
+}
+
 void Player::Accelat(float deltaTime) {
 	
 	accel += deltaTime * 0.0001f;
@@ -43,4 +58,29 @@ void Player::DeAccelat(float deltaTime) {
 	{
 		accel = 0.0f;
 	}
+}
+
+void Player::SetDetector(float radius)
+{
+	if (detector)
+	{
+		delete detector;
+		detector = nullptr;
+	}
+
+	learning::ColliderCircle* circleP = new learning::ColliderCircle;
+	detector = dynamic_cast<learning::ColliderCircle*>(circleP);
+
+	circleP->center = m_pos;
+	circleP->radius = radius;
+}
+
+void Player::Render(MyRender& render) {
+	render.DrawCollider(myCollider);
+	render.DrawCollider(detector);
+}
+
+Player::~Player() {
+	delete detector;
+	detector = nullptr;
 }
