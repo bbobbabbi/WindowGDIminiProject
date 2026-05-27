@@ -2,9 +2,14 @@
 
 #include "GameObject.h"
 
-class platform : public GameObject {
+class Player;
+
+class Platform : public GameObject {
 public:
-    platform(const GameObject&) = delete;
-    platform(ObjectType type) : GameObject(type) {}
-    ~platform() override {};
+    Platform(const GameObject&) = delete;
+    Platform(ObjectType type) : GameObject(type) {}
+    ~Platform() override;
+    void Move(float deltaTime) override;
+    void Update(float deltaTime) override;
+    Player* bumpedPlayer = nullptr;
 };

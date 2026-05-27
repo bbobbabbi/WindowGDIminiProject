@@ -20,6 +20,7 @@ enum class ObjectType
 {
     PLAYER,
     ENEMY,
+    PLATFORM,
     BULLET,
     ITEM,
     BACKGROUND,

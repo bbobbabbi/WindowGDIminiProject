@@ -5,6 +5,7 @@
 #include "GameObject.h"
 #include "MyRender.h"
 #include "Player.h"
+#include "platform.h"
 #include <iostream>
 #include <assert.h>
 
@@ -43,6 +44,42 @@ bool OiiAGame::Initialize()
     }
 
     CreatePlayer();
+    //////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+    //디버깅 용 플랫폼 하나 초기화
+    Platform* pNewObject = new Platform(ObjectType::PLATFORM);
+
+    pNewObject->SetName("Platform");
+
+    int x = (GetWidth()) / 2;
+    int y = (GetHeight())-15;
+    m_platformSpawnPos = { 0, 0 };
+
+    pNewObject->SetPosition(x, y);
+    pNewObject->SetSpeed(1.0f); // 일단, 임의로 설정   
+
+    pNewObject->SetColliderBox(100.0f, 30.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
+
+    int i = 0;
+    while (++i < MAX_GAME_OBJECT_COUNT) //0번째는 언제나 플레이어!
+    {
+        if (nullptr == m_GameObjectPtrTable[i])
+        {
+            m_GameObjectPtrTable[i] = pNewObject;
+            break;
+        }
+    }
+
+    if (i == MAX_GAME_OBJECT_COUNT)
+    {
+        // 게임 오브젝트 테이블이 가득 찼습니다.
+        delete pNewObject;
+        pNewObject = nullptr;
+    }
+    //////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+
+
 
     return true;
 }
@@ -65,6 +102,10 @@ void OiiAGame::Run()
             else if (msg.message == WM_MOUSEMOVE)
             {
                 OiiAGame::OnMouseMove(LOWORD(msg.lParam), HIWORD(msg.lParam));
+            }
+            else if (msg.message == WM_RBUTTONDOWN)
+            {
+                OiiAGame::OnRButtonDown(LOWORD(msg.lParam), HIWORD(msg.lParam));
             }
             else
             {
@@ -128,15 +169,14 @@ void OiiAGame::FixedUpdate()
     else {
         GetPlayer()->DeAccelat(m_fDeltaTime);
     }
-   // UpdateWholeIntersect();
+    UpdateWholeIntersect();
     //UpdateEnemyInfo();
     if (m_CirEnemySpawnPos.x != 0 && m_CirEnemySpawnPos.y != 0)
     {
         CreateCircleEnemy();
     }
-    else if (m_BoxEnemySpawnPos.x != 0 && m_BoxEnemySpawnPos.y != 0) {
-
-        CreateBoxEnemy();
+    else if (m_platformSpawnPos.x != 0 && m_platformSpawnPos.y != 0) {
+        CreatePlatform();
     }
 }
 
@@ -149,6 +189,9 @@ void OiiAGame::LogicUpdate()
         if (m_GameObjectPtrTable[i])
         {
             m_GameObjectPtrTable[i]->Update(m_fDeltaTime);
+        }
+        else {
+            break;
         }
     }
 }
@@ -176,6 +219,7 @@ void OiiAGame::CreatePlayer()
 
     m_GameObjectPtrTable[0] = pNewObject;
 }
+
 
 void OiiAGame::CreateCircleEnemy()
 {
@@ -245,61 +289,24 @@ void OiiAGame::CreateCircleEnemy()
     }
 
 }
-void OiiAGame::CreateBoxEnemy()
+
+void OiiAGame::CreatePlatform()
 {
-    GameObject* pNewObject = new GameObject(ObjectType::ENEMY);
+    Platform* pNewObject = new Platform(ObjectType::PLATFORM);
 
-    pNewObject->SetName("Enemy");
+    pNewObject->SetName("Platform");
 
-    float x = m_BoxEnemySpawnPos.x;
-    float y = m_BoxEnemySpawnPos.y;
-
-    m_BoxEnemySpawnPos = { 0, 0 };
+    float x = m_platformSpawnPos.x;
+    float y = m_platformSpawnPos.y;
+    m_platformSpawnPos = { 0, 0 };
 
     pNewObject->SetPosition(x, y);
     pNewObject->SetSpeed(1.0f); // 일단, 임의로 설정   
 
-    pNewObject->SetColliderBox(50.0f, 50.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
-
-    bool isInter = false;
-
-    learning::Collider* thisCollider = nullptr;
-
-    Vector2f firstDir;
-
-    //충돌 처리
-    int j = 0;
-    int t = 0;
-    while (j < MAX_GAME_OBJECT_COUNT) {
-        thisCollider = pNewObject->GetCollider();
-        GameObjectBase* target = m_GameObjectPtrTable[j];
-        if (target == nullptr) break;
-
-        learning::Collider* targetCollider = target->GetCollider();
-
-        if (thisCollider->IsIntersect(targetCollider)) {
-            //firstDir이 초기값일 때 
-            if (firstDir.x == 0 && firstDir.y == 0) {
-                firstDir = OiiAGame::GetBoxDir(thisCollider, targetCollider);
-            }
-            // 그리는 위치 업데이트
-            OiiAGame::SettingBoxPos(thisCollider, targetCollider, pNewObject, firstDir);
-            j = 0;
-            ++t;
-            //판정상 무한루프를 빠질 때가 있어서 그것 처리
-            if (t == MAX_GAME_OBJECT_COUNT) {
-                isInter = true;
-                break;
-            }
-            continue;
-        }
-        ++j;
-    }
-
-
+    pNewObject->SetColliderBox(100.0f, 30.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
 
     int i = 0;
-    while (++i < MAX_GAME_OBJECT_COUNT && !isInter) //0번째는 언제나 플레이어!
+    while (++i < MAX_GAME_OBJECT_COUNT) //0번째는 언제나 플레이어!
     {
         if (nullptr == m_GameObjectPtrTable[i])
         {
@@ -308,14 +315,17 @@ void OiiAGame::CreateBoxEnemy()
         }
     }
 
-    if (i == MAX_GAME_OBJECT_COUNT || isInter)
+    if (i == MAX_GAME_OBJECT_COUNT)
     {
         // 게임 오브젝트 테이블이 가득 찼습니다.
         delete pNewObject;
         pNewObject = nullptr;
-        isInter = false;
     }
 }
+
+
+
+
 void OiiAGame::SettingCirPos(learning::Collider* thisCir, learning::Collider* targetCir, GameObject* pThis) {
     auto a = dynamic_cast<ColliderCircle*>(thisCir);
     float radius = a->radius;
@@ -377,27 +387,24 @@ void OiiAGame::UpdateWholeIntersect() {
     while (j < MAX_GAME_OBJECT_COUNT) {
         GameObjectBase* target = m_GameObjectPtrTable[j];
         if (target == nullptr) break;
+
         learning::Collider* targetCollider = target->GetCollider();
 
+        Platform* tempPlatform = dynamic_cast<Platform*>(target);
+        //Enemy* tempEnemy = dynamic_cast<Enemy*>(target);
 
-        //적끼리 충돌
-        for (int i = j + 1; i < MAX_GAME_OBJECT_COUNT; i++) {
-            if (m_GameObjectPtrTable[i]) {
-                GameObjectBase* targetEnemy = m_GameObjectPtrTable[i];
-                learning::Collider* targetEnemyCollider = targetEnemy->GetCollider();
-                if (targetCollider->IsIntersect(targetEnemyCollider)) {
-                    targetCollider->isEnemyIntersect = true;
-                    targetEnemyCollider->isEnemyIntersect = true;
-                }
+        if (playerCollider->IsIntersect(targetCollider)) {
+            if (tempPlatform != nullptr) {
+                playerCollider->isPlayerIntersect = true;
+                targetCollider->isPlayerIntersect = true;
+                tempPlatform->bumpedPlayer = pPlayer;
             }
         }
+     
+        //else if(tempEnemy != nullptr){}
 
-        //플레이어 와 적 오브젝트 끼리 검사
-        if (playerCollider->IsIntersect(targetCollider)) {
-            targetCollider->isPlayerIntersect = true;
-            playerCollider->isPlayerIntersect = true;
-        }
 
+        tempPlatform = nullptr;
         ++j;
     }
 }
@@ -545,15 +552,11 @@ void OiiAGame::OnLButtonUp(int x, int y) {
 
 void OiiAGame::OnRButtonDown(int x, int y)
 {
-    /*  std::cout << __FUNCTION__ << std::endl;
-   std::cout << "x: " << x << ", y: " << y << std::endl;*/
-
-    m_CirEnemySpawnPos.x = x;
-    m_CirEnemySpawnPos.y = y;
+    m_platformSpawnPos.x = x;
+    m_platformSpawnPos.y = y;
 }
 
 void OiiAGame::OnMButtonDown(int x, int y)
 {
-    m_BoxEnemySpawnPos.x = x;
-    m_BoxEnemySpawnPos.y = y;
+ 
 }

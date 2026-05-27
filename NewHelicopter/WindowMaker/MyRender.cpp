@@ -42,6 +42,9 @@ void MyRender::DrawGameObject(int drawCount, GameObjectBase** drawTargets){
 		{
 			drawTargets[i]->Render(*Instance);
 		}
+		else {
+			break;
+		}
 	}
 }
 

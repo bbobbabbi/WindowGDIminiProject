@@ -48,7 +48,7 @@ private:
 
     void CreatePlayer();
     void CreateCircleEnemy();
-    void CreateBoxEnemy();
+    void CreatePlatform();
     void UpdatePlayerInfo();
     //void UpdateEnemyInfo();
     void UpdateWholeIntersect();
@@ -87,7 +87,7 @@ private:
 
     MOUSE_POS m_PlayerTargetPos = { 0, 0 };
     MOUSE_POS m_CirEnemySpawnPos = { 0, 0 };
-    MOUSE_POS m_BoxEnemySpawnPos = { 0, 0 };
+    MOUSE_POS m_platformSpawnPos = { 0, 0 };
 
 
     renderHelp::BitmapInfo* m_pPlayerBitmapInfo = nullptr;

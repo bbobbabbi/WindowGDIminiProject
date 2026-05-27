@@ -17,7 +17,7 @@ public:
     void DeAccelat(float deltaTime);
 private:
     learning::Vector2f UpDir;
-    float accel;
+    float accel=0;
     float elapsedTime = 0.0f;
     const float MaxSpeed = 0.5f;
     const float MaxAccel= 0.001f;
