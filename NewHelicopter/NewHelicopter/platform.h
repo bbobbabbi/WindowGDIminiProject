@@ -14,4 +14,5 @@ public:
     Player* bumpedPlayer = nullptr;
     learning::ColliderBox* platfCol = nullptr;
     learning::ColliderBox* playerfCol = nullptr;
+    bool isPlatformDetected = false;
 };

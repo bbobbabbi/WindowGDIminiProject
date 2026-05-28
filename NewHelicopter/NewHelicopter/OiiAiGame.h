@@ -81,7 +81,7 @@ private:
     MOUSE_POS m_MousePos = { 0, 0 };
     MOUSE_POS m_MousePosPrev = { 0, 0 };
 
-    MOUSE_POS m_PlayerTargetPos = { 0, 0 };
+    MOUSE_POS m_mousClickPos = { 0, 0 };
     MOUSE_POS m_CirEnemySpawnPos = { 0, 0 };
     MOUSE_POS m_platformSpawnPos = { 0, 0 };
 

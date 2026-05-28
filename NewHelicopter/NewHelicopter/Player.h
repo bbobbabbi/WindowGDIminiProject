@@ -18,6 +18,7 @@ public:
     void Accelat(float deltaTime);
     void DeAccelat(float deltaTime);
     void SetDetector(float radius);
+    learning::ColliderCircle* GetDetector();
 private:
     learning::Vector2f UpDir;
     float accel=0;

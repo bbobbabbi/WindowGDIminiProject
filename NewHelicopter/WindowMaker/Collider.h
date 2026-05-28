@@ -31,11 +31,15 @@ namespace learning
 		Collider& GetCollider() override;
 		bool IsIntersect(Collider* colTarget) override;
 		void Draw(MyRender& render)override;
+		bool IsAbove(Collider* platform);
 	};
 
 	// Circle
 	bool Intersect(ColliderCircle const& lhs, ColliderCircle const& rhs);
 	// AABB
 	bool Intersect(ColliderBox const& lhs, ColliderBox const& rhs);
+
+	bool Intersect(ColliderCircle const& circle, ColliderBox const& box);
+	bool Intersect(ColliderBox const& box, ColliderCircle const& circle);
 }
 

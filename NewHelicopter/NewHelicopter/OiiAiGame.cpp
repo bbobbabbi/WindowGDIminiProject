@@ -169,7 +169,7 @@ void OiiAGame::FixedUpdate()
     else {
         GetPlayer()->DeAccelat(m_fDeltaTime);
     }
-    UpdateWholeIntersect();
+   
     //UpdateEnemyInfo();
     if (m_CirEnemySpawnPos.x != 0 && m_CirEnemySpawnPos.y != 0)
     {
@@ -182,8 +182,9 @@ void OiiAGame::FixedUpdate()
 
 void OiiAGame::LogicUpdate()
 {
+     UpdatePlayerInfo();
+     UpdateWholeIntersect();
 
-    UpdatePlayerInfo();
     for (int i = 0; i < MAX_GAME_OBJECT_COUNT; ++i)
     {
         if (m_GameObjectPtrTable[i])
@@ -216,7 +217,7 @@ void OiiAGame::CreatePlayer()
     pNewObject->SetSpeed(0.0f); // 일단, 임의로 설정   
 
     pNewObject->SetColliderBox(60.0f,40.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
-    pNewObject->SetDetector(300);
+    pNewObject->SetDetector(700);
     m_GameObjectPtrTable[0] = pNewObject;
 }
 
@@ -271,6 +272,7 @@ void OiiAGame::UpdateWholeIntersect() {
     static Player* pPlayer = GetPlayer();
     Vector2f playerPos = pPlayer->GetPosition();
     auto playerCollider = pPlayer->GetCollider();
+    auto playerDetector = pPlayer->GetDetector();
 
     //전체 초기화
     for (int i = 0; i < MAX_GAME_OBJECT_COUNT; i++) {
@@ -280,6 +282,8 @@ void OiiAGame::UpdateWholeIntersect() {
         target->GetCollider()->isEnemyIntersect = false;
     }
 
+
+    //오브젝트 캐릭터 충돌 처리 모음
     int j = 1;
     while (j < MAX_GAME_OBJECT_COUNT) {
         GameObjectBase* target = m_GameObjectPtrTable[j];
@@ -290,14 +294,31 @@ void OiiAGame::UpdateWholeIntersect() {
         Platform* tempPlatform = dynamic_cast<Platform*>(target);
         //Enemy* tempEnemy = dynamic_cast<Enemy*>(target);
 
-        //충돌한게 플랫폼일 때 
+        //플레이어 감지 범위에 들어오지 않으면 충돌 처리 x 
+        if (!playerDetector->IsIntersect(targetCollider)) {
+            ++j;
+            continue;
+        }
+
         if (playerCollider->IsIntersect(targetCollider)) {
+            //충돌한게 플랫폼일 때 
             if (tempPlatform != nullptr) {
-                playerCollider->isPlayerIntersect = true;
-                targetCollider->isPlayerIntersect = true;
-                //플랫폼에 플레이어 정보 넘기기
-                tempPlatform->bumpedPlayer = pPlayer;
-                tempPlatform->playerfCol = dynamic_cast<learning::ColliderBox*>(pPlayer->GetCollider());
+                auto pCollider = dynamic_cast<learning::ColliderBox*>(pPlayer->GetCollider());
+                tempPlatform->isPlatformDetected = false;
+
+                //사각형과 플레이어의 위치 검사
+                //플레이어의 밑이 플랫폼의 가장 위 보다 클 때만 밀어내기 적용
+                if (pCollider->IsAbove(targetCollider)) {
+                    tempPlatform->isPlatformDetected = true;
+                }
+
+                if (tempPlatform->isPlatformDetected) {
+                    playerCollider->isPlayerIntersect = true;
+                    targetCollider->isPlayerIntersect = true;
+                    //플랫폼에 플레이어 정보 넘기기
+                    tempPlatform->bumpedPlayer = pPlayer;
+                    tempPlatform->playerfCol = pCollider;
+                }
             }
         }
         //else if(tempEnemy != nullptr){}
@@ -309,10 +330,56 @@ void OiiAGame::UpdateWholeIntersect() {
 
 void OiiAGame::UpdatePlayerInfo()
 {
-    static Player* pPlayer = dynamic_cast<Player*>(GetPlayer()) ;
-    assert(pPlayer != nullptr);
+    static Player* pPlayer = dynamic_cast<Player*>(GetPlayer());
+
     Vector2f playerDir = pPlayer->GetUpDir();
-    pPlayer->SetDirection(playerDir);
+
+    // 화면 세로 3등분
+    float leftZoneEnd = m_width / 3.0f;
+    float rightZoneStart = m_width * 2.0f / 3.0f;
+
+    // 좌우 기울기 가중치
+    float weight = 1.f;
+
+    Vector2f mouseDir{ 0.f, 0.f };
+
+    if (m_MousePos.x < leftZoneEnd)
+    {
+        // 왼쪽 영역
+        float ratio = (leftZoneEnd - m_MousePos.x) / leftZoneEnd;
+
+        // 왼쪽으로 갈수록 더 강하게
+        mouseDir.x = -ratio * weight;
+    }
+    else if (m_MousePos.x > rightZoneStart)
+    {
+        // 오른쪽 영역
+        float ratio =
+            (m_MousePos.x - rightZoneStart) /
+            (m_width - rightZoneStart);
+
+        // 오른쪽으로 갈수록 더 강하게
+        mouseDir.x = ratio * weight;
+    }
+    else
+    {
+        // 중앙 영역은 직진
+        mouseDir.x = 0.f;
+    }
+
+    Vector2f finalDir = playerDir + mouseDir;
+
+    // 필요하면 정규화
+    // finalDir.Normalize();
+
+    if (isMouseDown)
+    {
+        pPlayer->SetDirection(finalDir);
+    }
+    else
+    {
+        pPlayer->SetDirection(Vector2f(0, 0));
+    }
 }
 
 
@@ -429,7 +496,13 @@ void OiiAGame::OnMouseMove(int x, int y)
 {
     /*   std::cout << __FUNCTION__ << std::endl;
        std::cout << "x: " << x << ", y: " << y << std::endl;*/
+    
+
     m_MousePosPrev = m_MousePos;
+    if (isMouseDown) {
+        m_mousClickPos.x = x;
+        m_mousClickPos.y = y;
+    }
     m_MousePos = { x, y };
 }
 
@@ -438,11 +511,12 @@ void OiiAGame::OnLButtonDown(int x, int y)
     /*  std::cout << __FUNCTION__ << std::endl;
  std::cout << "x: " << x << ", y: " << y << std::endl;*/
     isMouseDown = true;
-    m_PlayerTargetPos.x = x;
-    m_PlayerTargetPos.y = y;
-
+    m_mousClickPos.x = x;
+    m_mousClickPos.y = y;
 }
 void OiiAGame::OnLButtonUp(int x, int y) {
+    m_mousClickPos.x = 0;
+    m_mousClickPos.y = 0;
     isMouseDown = false;
 }
 
@@ -455,5 +529,7 @@ void OiiAGame::OnRButtonDown(int x, int y)
 
 void OiiAGame::OnMButtonDown(int x, int y)
 {
+    m_mousClickPos.x = x;
+    m_mousClickPos.y = y;
  
 }

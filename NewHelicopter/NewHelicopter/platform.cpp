@@ -15,9 +15,13 @@ void Platform::Update (float deltatime) {
     if (!myCollider->isPlayerIntersect || bumpedPlayer == nullptr)
         return;
 
+    if (bumpedPlayer->GetSpeed() > 0) {
+        return;
+    }
+
     auto* pb = playerfCol;
     auto* tb = platfCol;
-
+    
     if (pb == nullptr || tb == nullptr)
     {
         std::cout << "사각형 밀어내기 콜라이더 변환 실패" << std::endl;

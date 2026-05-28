@@ -14,15 +14,13 @@ learning::Vector2f Player::GetUpDir(){
 
 
 void Player::Move(float deltaTime) {
-	m_speed += (accel -Gravity)* deltaTime;
+	m_speed += (accel - Gravity) * deltaTime; 
 
-	if (m_speed > MaxSpeed) 
-	{
-		m_speed = MaxSpeed;
-	}
+	if (m_speed > MaxSpeed) { m_speed = MaxSpeed; }
 
-	float distance = m_speed* deltaTime;
-
+	float distance = m_speed * deltaTime; 
+	
+	if (m_dir.y == 0) m_dir = learning::Vector2f(0,-1);
 	m_pos += m_dir * distance;
 }
 
@@ -41,7 +39,7 @@ void Player::Update(float deltaTime)
 
 void Player::Accelat(float deltaTime) {
 	
-	accel += deltaTime * 0.0001f;
+	accel += deltaTime * 0.01f;
 
 	// 최대값 제한
 	if (accel > MaxAccel)
@@ -52,7 +50,7 @@ void Player::Accelat(float deltaTime) {
 }
 
 void Player::DeAccelat(float deltaTime) {
-	accel -= deltaTime * 0.01f;
+	accel -= deltaTime * 0.001f;
 
 	if (accel < 0.0f)
 	{
@@ -74,6 +72,13 @@ void Player::SetDetector(float radius)
 	circleP->center = m_pos;
 	circleP->radius = radius;
 }
+
+learning::ColliderCircle* Player::GetDetector()
+{
+	return detector;
+}
+
+
 
 void Player::Render(MyRender& render) {
 	render.DrawCollider(myCollider);
