@@ -121,7 +121,7 @@ void Player::UpdateFrame(float deltaTime, float speed)
 		maxFrameDuration +
 		(minFrameDuration - maxFrameDuration) * t;
 
-	if (speed <= -0.2f)
+	if (speed <= 0)
 	{
 		m_frameIndex = m_startframeIndex;
 		m_frameTime = 0.0f;
