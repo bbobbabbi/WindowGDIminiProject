@@ -6,6 +6,7 @@
 #include "MyRender.h"
 #include "Player.h"
 #include "platform.h"
+#include "RenderHelp.h"
 #include <iostream>
 #include <assert.h>
 
@@ -43,7 +44,6 @@ bool OiiAGame::Initialize()
         m_GameObjectPtrTable[i] = nullptr;
     }
 
-    CreatePlayer();
     //////////////////////////////////////////////////
     //////////////////////////////////////////////////
     //디버깅 용 플랫폼 하나 초기화
@@ -79,7 +79,14 @@ bool OiiAGame::Initialize()
     //////////////////////////////////////////////////
     //////////////////////////////////////////////////
 
+    #pragma region resource
+    //주의 ! IDE 에서 인지하는 현재 경로와 실제 실행 파일을 ㅏ로 실행했을 때의 경로 기준이 달라짐.
+        m_pPlayerBitmapInfo = renderHelp::CreateBitmapInfo(L"../Resource/oia-uia_200x200_120f_sheet.png");
+        m_pEnemyBitmapInfo = renderHelp::CreateBitmapInfo(L"../Resource/rat-dance_200x200_120f_sheet.png");
+    #pragma endregion
 
+
+        CreatePlayer();
 
     return true;
 }
@@ -217,7 +224,9 @@ void OiiAGame::CreatePlayer()
     pNewObject->SetSpeed(0.0f); // 일단, 임의로 설정   
 
     pNewObject->SetColliderBox(60.0f,40.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
-    pNewObject->SetDetector(700);
+    pNewObject->SetDetector(300);
+
+    pNewObject->SetBitmapInfo(m_pPlayerBitmapInfo);
     m_GameObjectPtrTable[0] = pNewObject;
 }
 
@@ -513,6 +522,11 @@ void OiiAGame::OnLButtonDown(int x, int y)
     isMouseDown = true;
     m_mousClickPos.x = x;
     m_mousClickPos.y = y;
+    //클릭시 강제 속도 변환
+    Player* p = GetPlayer();
+    if (p->GetSpeed() < -0.35f) {
+        p->SetSpeed(-0.4f);
+    }
 }
 void OiiAGame::OnLButtonUp(int x, int y) {
     m_mousClickPos.x = 0;

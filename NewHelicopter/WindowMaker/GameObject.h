@@ -97,40 +97,16 @@ public:
 
     void SetWidthAndHeight(float width, float height);
 
-protected:
 
+protected:
     void virtual Move(float deltaTime);
 
 //    void UpdateFrame(float deltaTime);
 
-    // Bitmap 정보
     BitmapInfo* m_pBitmapInfo = nullptr;
 
     int m_width = 100;
     int m_height = 100;
-
-    // 점진적으로 예쁘게 고쳐 보아요.
-    struct FrameFPos
-    {
-        int x;
-        int y;
-    };
-    // 프레임 정보: 왜 14개냐고 물으시면 셌다고 밖에...:)
-    // 
-   /* FrameFPos m_frameXY[14] = { {0, 0}, {102, 0}, {204, 0}, {306, 0}, {408, 0},
-    {0, 95}, {102, 95}, {204, 95}, {306, 95}, {408, 95},
-    {0, 189}, {102, 189}, {204, 189}, {306, 189} };*/
-    FrameFPos m_frameXY[14] = { };
-    int m_frameWidth = 101;
-    int m_frameHeight = 93;
-    int m_frameIndex = 0;
-    int m_frameCount = 14; // 프레임 수
-
-    float m_frameTime = 0.0f;
-    float m_frameDuration = 70.0f; // 임의 설정
-
-
-
 
     // Collider
     learning::Collider* myCollider = nullptr;

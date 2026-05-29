@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "MyRender.h"
+#include "renderHelp.h"
 #include "Utillity.h"
 #include "GameObject.h"
 
@@ -36,7 +37,7 @@ void MyRender::Render(int drawCount, GameObjectBase** drawTargets) {
 }
 
 void MyRender::DrawGameObject(int drawCount, GameObjectBase** drawTargets){
-	for (int i = 0; i < drawCount; ++i)
+	for (int i = 0; i < drawCount; i++)
 	{
 		if (drawTargets[i])
 		{
@@ -46,6 +47,39 @@ void MyRender::DrawGameObject(int drawCount, GameObjectBase** drawTargets){
 			break;
 		}
 	}
+}
+
+
+
+void MyRender::DrawBitmap(renderHelp::BitmapInfo* m_pBitmapInfo,float m_width,float m_height , learning::Vector2f m_pos, MyRender::FrameFPos* m_frameXY,int m_frameIndex,int m_frameWidth,int m_frameHeight)
+{
+	if (m_pBitmapInfo == nullptr) return;
+	if (m_pBitmapInfo->GetBitmapHandle() == nullptr) return;
+
+	HDC hBitmapDC = CreateCompatibleDC(m_hBackDC);
+
+	HBITMAP hOldBitmap = (HBITMAP)SelectObject(hBitmapDC, m_pBitmapInfo->GetBitmapHandle());
+	// BLENDFUNCTION 설정 (알파 채널 처리)
+	BLENDFUNCTION blend = { 0 };
+	blend.BlendOp = AC_SRC_OVER;
+	blend.SourceConstantAlpha = 255;  // 원본 알파 채널 그대로 사용
+	blend.AlphaFormat = AC_SRC_ALPHA;
+
+
+	const int x = m_pos.x - m_width / 2;
+	const int y = m_pos.y - m_height / 2;
+
+	const int srcX = m_frameXY[m_frameIndex].x;
+	const int srcY = m_frameXY[m_frameIndex].y;
+
+	//실제 비트맵에 그림
+	AlphaBlend(m_hBackDC, x, y, m_width, m_height,
+		hBitmapDC, srcX, srcY, m_frameWidth, m_frameHeight, blend);
+
+	// 비트맵 핸들 복원
+	SelectObject(hBitmapDC, hOldBitmap);
+	DeleteDC(hBitmapDC);
+
 }
 
 void MyRender::DrawCollider(learning::Collider* myCollider)
@@ -107,3 +141,5 @@ void MyRender::OnClose(HWND hd)
 
 	ReleaseDC(hd, m_hFrontDC);
 }
+
+

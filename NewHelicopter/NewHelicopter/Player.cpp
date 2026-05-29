@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "Utillity.h"
 #include "MyRender.h"
+#include "RenderHelp.h"
 #include <iostream>
 
 
@@ -27,7 +28,7 @@ void Player::Move(float deltaTime) {
 void Player::Update(float deltaTime)
 {
 	Move(deltaTime);
-
+	UpdateFrame(deltaTime,m_speed);
 	if (myCollider)
 	{
 		myCollider->center = m_pos;
@@ -46,7 +47,7 @@ void Player::Accelat(float deltaTime) {
 	{
 		accel = MaxAccel;
 	}
-	std::cout << accel << std::endl;
+	std::cout << accel <<"   "<< m_speed << std::endl;
 }
 
 void Player::DeAccelat(float deltaTime) {
@@ -79,10 +80,65 @@ learning::ColliderCircle* Player::GetDetector()
 }
 
 
+void Player::SetBitmapInfo(renderHelp::BitmapInfo* bitmapInfo) {
+	m_pBitmapInfo = bitmapInfo;
+	// 스프라이트 정보는 일단은 하드코딩해요. 
+  // 일단, 프레임 크기와 시간이 같다고 가정합니다.
+	m_frameWidth = m_pBitmapInfo->GetWidth() / 12;
+	m_frameHeight = m_pBitmapInfo->GetHeight() / 10;
+	m_frameIndex = 0;
+	for (int i = 0; i < 60; ++i)
+	{
+		m_frameXY[i].x = (i % 10) * 200;
+		m_frameXY[i].y = (i / 10) * 200;
+	}
+}
+
 
 void Player::Render(MyRender& render) {
 	render.DrawCollider(myCollider);
 	render.DrawCollider(detector);
+	render.DrawBitmap(m_pBitmapInfo,m_width,m_height,m_pos,m_frameXY,m_frameIndex,m_frameWidth,m_frameHeight);
+}
+
+// 가져오는 그림 처리 
+void Player::UpdateFrame(float deltaTime, float speed)
+{
+	const float minSpeed = -0.2f;
+	const float maxSpeed = 0.5f;        // 최고 속도 기준으로 수정
+
+	const float maxFrameDuration = 50.f; // 느릴 때
+	const float minFrameDuration = 10.f; // 빠를 때
+
+	float t = (speed - minSpeed) / (maxSpeed - minSpeed);
+
+	if (t < 0.0f)
+		t = 0.0f;
+	else if (t > 1.0f)
+		t = 1.0f;
+
+	m_frameDuration =
+		maxFrameDuration +
+		(minFrameDuration - maxFrameDuration) * t;
+
+	if (speed <= -0.2f)
+	{
+		m_frameIndex = m_startframeIndex;
+		m_frameTime = 0.0f;
+		return;
+	}
+
+	m_frameTime += deltaTime;
+
+	if (m_frameTime >= m_frameDuration)
+	{
+		m_frameTime = 0.0f;
+
+		int localFrame =
+			(m_frameIndex - m_startframeIndex + 1) % m_frameCount;
+
+		m_frameIndex = m_startframeIndex + localFrame;
+	}
 }
 
 Player::~Player() {

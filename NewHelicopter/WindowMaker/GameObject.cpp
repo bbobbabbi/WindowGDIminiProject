@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "MyRender.h"
+#include "renderHelp.h"
 #include "GameObject.h"
 #include <assert.h>
 
@@ -27,9 +28,6 @@ void GameObject::Update(float deltaTime)
 
 void GameObject::Render(MyRender& render)
 {
-    //비트맵 그리기
-
-    //DrawBitmap(hdc);
     render.DrawCollider(myCollider);
 }
 
@@ -51,6 +49,7 @@ void GameObject::SetColliderCircle(float radius)
     circleP->radius = radius;
     circleP->center = m_pos;
 }
+
 
 
 void GameObject::SetColliderBox(float width, float height)

@@ -1,5 +1,6 @@
 #pragma once
 #include "pch.h"
+#include "RenderHelp.h"
 
 class GameObjectBase;
 namespace learning {
@@ -10,9 +11,16 @@ namespace learning {
 }
 
 
+
 class MyRender
 {
+
 public:
+	struct FrameFPos
+	{
+		int x;
+		int y;
+	};
 	MyRender() {
 		Instance = this;
 	};
@@ -20,6 +28,7 @@ public:
 		if (Instance != nullptr) {
 			Instance = nullptr;
 		}
+
 	}
 	HWND mhWnd;
 	HDC m_hFrontDC = nullptr;
@@ -37,5 +46,7 @@ public:
 	void DrawCircleCollider(learning::ColliderCircle* col);
 	void DrawBoxCollider(learning::ColliderBox* col);
 	void OnResize(int width, int height);
+
+	void DrawBitmap(renderHelp::BitmapInfo* m_pBitmapInfo, float m_width, float m_height, learning::Vector2f m_pos, FrameFPos* m_frameXY, int m_frameIndex, int m_frameWidth, int m_frameHeight);
 	void OnClose(HWND hd);
 };

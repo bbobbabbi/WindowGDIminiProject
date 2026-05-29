@@ -41,6 +41,7 @@ void Platform::Update (float deltatime) {
         bumpedPlayer->SetPosition(pPos.x, pPos.y - penetration);
         bumpedPlayer->SetSpeed(0);
     }
+    
 }
 
 Platform::~Platform() {
