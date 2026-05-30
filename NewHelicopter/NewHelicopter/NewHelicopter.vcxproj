@@ -130,6 +130,7 @@
     <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="externVer.h" />
     <ClInclude Include="OiiAiGame.h" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="Player.h" />

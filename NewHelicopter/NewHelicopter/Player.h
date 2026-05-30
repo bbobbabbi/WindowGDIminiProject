@@ -34,13 +34,14 @@ private:
     float m_verticalSpeed = 0.0f;
     learning::ColliderCircle* detector = nullptr;
 
+    //윈도우에 나올 사이즈
     int m_width = 200;
     int m_height = 200;
 
     MyRender::FrameFPos m_frameXY[60] ={};
    
-    int m_frameWidth = 200;
-    int m_frameHeight = 200;
+    int m_frameWidth = 100;
+    int m_frameHeight = 100;
     int m_frameIndex = 1;
     int m_startframeIndex = 0;
     int m_frameCount = 59; // 프레임 수

@@ -4,6 +4,7 @@
 #include "Utillity.h"
 #include "MyRender.h"
 #include "RenderHelp.h"
+#include "externVer.h"
 #include <iostream>
 
 
@@ -117,11 +118,9 @@ void Player::UpdateFrame(float deltaTime, float speed)
 	else if (t > 1.0f)
 		t = 1.0f;
 
-	m_frameDuration =
-		maxFrameDuration +
-		(minFrameDuration - maxFrameDuration) * t;
+	m_frameDuration = maxFrameDuration + (minFrameDuration - maxFrameDuration) * t;
 
-	if (speed <= 0)
+	if (!isMouseDown || speed <= -0.3f)
 	{
 		m_frameIndex = m_startframeIndex;
 		m_frameTime = 0.0f;
@@ -130,7 +129,7 @@ void Player::UpdateFrame(float deltaTime, float speed)
 
 	m_frameTime += deltaTime;
 
-	if (m_frameTime >= m_frameDuration)
+	if (isMouseDown && m_frameTime >= m_frameDuration)
 	{
 		m_frameTime = 0.0f;
 

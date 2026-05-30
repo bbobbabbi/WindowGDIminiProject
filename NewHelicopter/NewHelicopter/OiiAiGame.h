@@ -18,6 +18,7 @@ namespace learning {
     class Collider;
 }
 
+
 class OiiAGame : public NzWndBase
 {
 public:
@@ -57,7 +58,6 @@ private:
 
 private:
 
-    bool isMouseDown = false;
     MyRender* render;
     // [CHECK] #8. 게임 타이머를 사용하여 프레임을 관리하는 예시.F
     GameTimer* m_pGameTimer = nullptr;

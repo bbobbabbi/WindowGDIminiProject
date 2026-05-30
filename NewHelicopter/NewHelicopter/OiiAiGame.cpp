@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "platform.h"
 #include "RenderHelp.h"
+#include "externVer.h"
 #include <iostream>
 #include <assert.h>
 
@@ -14,6 +15,7 @@
 using namespace learning;
 
 constexpr int MAX_GAME_OBJECT_COUNT = 1000;
+bool isMouseDown = false;
 
 class D2DRenderSystem
 {
@@ -25,7 +27,6 @@ bool OiiAGame::Initialize()
     m_pGameTimer = new GameTimer();
     m_pGameTimer->Reset();
     render = new MyRender();
-
 
     const wchar_t* className = L"D2DLesson01";
     const wchar_t* windowName = L"Hello, DirectX";
@@ -223,7 +224,7 @@ void OiiAGame::CreatePlayer()
     pNewObject->SetPosition(x, y+200); // 일단, 임의로 설정 
     pNewObject->SetSpeed(0.0f); // 일단, 임의로 설정   
 
-    pNewObject->SetColliderBox(60.0f,40.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
+    pNewObject->SetColliderBox(200.0f,200.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
     pNewObject->SetDetector(300);
 
     pNewObject->SetBitmapInfo(m_pPlayerBitmapInfo);
