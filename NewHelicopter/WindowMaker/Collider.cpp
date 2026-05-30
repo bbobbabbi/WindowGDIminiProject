@@ -47,11 +47,12 @@ bool learning::ColliderBox::IsAbove(Collider* platform)
 	if (platformCol == nullptr) return false;
 
 	//player 바텀
-	int playerBottom = this->center.y + this->halfSize.y;
+	float playerBottom = this->center.y + this->halfSize.y;
 
-	int platformTop = platformCol->center.y - platformCol->halfSize.y;
+	float platformTop = platformCol->center.y - platformCol->halfSize.y;
 
-	return playerBottom <= platformTop;
+	//여유로운 판정
+	return playerBottom - platformTop <= 1;
  }
 
 

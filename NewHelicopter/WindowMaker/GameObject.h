@@ -43,7 +43,8 @@ public:
     virtual void Render(MyRender& render) = 0;
     virtual learning::Collider* GetCollider() = 0;
 
-    void SetPosition(float x, float y) { m_pos = { x, y }; }
+    void SetWPosition(float x, float y) { m_Wpos = { x, y }; }
+    void SetCPosition(Vector2f pos) { m_Cpos =pos; }
     void SetDirection(Vector2f dir) { m_dir = dir; }
     void SetSpeed(float speed) { m_speed = speed; }
     void SetName(const char* name);
@@ -52,7 +53,8 @@ public:
 
     const char* GetName() const { return m_name; }
 
-    Vector2f GetPosition() const { return m_pos; }
+    Vector2f GetWPosition() const { return m_Wpos; }
+    Vector2f GetCPosition() const { return m_Cpos; }
     Vector2f GetDirection() const { return m_dir; }
 
     float GetSpeed() const { return m_speed; }
@@ -61,14 +63,15 @@ protected:
 
     void Move(float deltaTime)
     {
-        m_pos.x += m_dir.x * m_speed * deltaTime;
-        m_pos.y += m_dir.y * m_speed * deltaTime;
+        m_Wpos.x += m_dir.x * m_speed * deltaTime;
+        m_Wpos.y += m_dir.y * m_speed * deltaTime;
     }
 
 protected:
     ObjectType m_type;
 
-    Vector2f m_pos = { 0.0f, 0.0f };
+    Vector2f m_Wpos = { 0.0f, 0.0f };
+    Vector2f m_Cpos = { 0.0f, 0.0f };
     Vector2f m_dir = { 0.0f, 0.0f }; // 방향 (단위 벡터)
 
     float m_speed = 0.0f; // 속력

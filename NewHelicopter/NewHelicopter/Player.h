@@ -19,6 +19,7 @@ public:
     void Accelat(float deltaTime);
     void DeAccelat(float deltaTime);
     void SetDetector(float radius);
+    void ZeroReset();
     learning::ColliderCircle* GetDetector();
     void SetBitmapInfo(renderHelp::BitmapInfo * bitmapInfo);
     // 가져오는 그림 처리 
@@ -28,9 +29,10 @@ private:
     learning::Vector2f UpDir;
     float accel=0;
     float elapsedTime = 0.0f;
-    const float MaxSpeed = 0.5f;
-    const float MaxAccel= 0.001f;
-    const float Gravity= 0.0005f;
+    const float MaxSpeed = 2.f;
+    const float MinSpeed = -3.f;
+    const float MaxAccel= 0.002f;
+    const float Gravity= 0.0015f;
     float m_verticalSpeed = 0.0f;
     learning::ColliderCircle* detector = nullptr;
 
@@ -44,8 +46,8 @@ private:
     int m_frameHeight = 100;
     int m_frameIndex = 1;
     int m_startframeIndex = 0;
-    int m_frameCount = 59; // 프레임 수
+    int m_frameCount = 60; // 프레임 수
 
     float m_frameTime = 0.0f;
-    float m_frameDuration = 10.0f; // 임의 설정
+    float m_frameDuration = 30.0f; // 임의 설정
 };

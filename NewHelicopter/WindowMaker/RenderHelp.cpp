@@ -29,6 +29,7 @@ namespace renderHelp
         }
 
         bool Initialize() {
+
             //Co ´Â COM °´Ã¼
             m_LastError = CoCreateInstance(
                 CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&m_pFactory)); // ÆÑÅä¸® ¹Þ¾Æ¿À±â

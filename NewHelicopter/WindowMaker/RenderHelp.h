@@ -1,6 +1,7 @@
 #pragma once
 #include "Windows.h"
 
+
 namespace renderHelp
 {
     struct WICInitializer;
@@ -45,6 +46,20 @@ namespace renderHelp
         BitmapInfo& operator=(const BitmapInfo&) = delete;
     };
 
+    struct Camera
+    {
+        learning::Vector2f pos{ 0,0 };
+        int width = 0;
+        int height = 0;
+
+        void Follow(const learning::Vector2f& targetPos, float screenSizeX, float screenSizeY)
+        {
+            width = screenSizeX;
+            height = screenSizeY;
+            pos.x = targetPos.x - width / 2;
+            pos.y = targetPos.y - height *3/ 4;
+        }
+    };
     //파일명으로 비트맵info 클래스 만들기
     BitmapInfo* CreateBitmapInfo(LPCWSTR filename);
 }

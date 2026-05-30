@@ -52,8 +52,8 @@ bool NzWndBase::Create(const wchar_t* className, const wchar_t* windowName, int 
 	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-	m_width = screenWidth / 3;
-	m_height = screenHeight/1.2f;
+	m_width = screenWidth / 2;
+	m_height = screenHeight;
 
 	int posX = (screenWidth - m_width) / 2;
 	int posY = (screenHeight - m_height) / 2;

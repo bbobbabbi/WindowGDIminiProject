@@ -54,12 +54,10 @@ bool OiiAGame::Initialize()
 
     int x = (GetWidth()) / 2;
     int y = (GetHeight())-15;
-    m_platformSpawnPos = { 0, 0 };
+    m_platformSpawnWPos = { 0, 0 };
 
-    pNewObject->SetPosition(x, y);
-    pNewObject->SetSpeed(1.0f); // 일단, 임의로 설정   
-
-    pNewObject->SetColliderBox(100.0f, 30.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
+    pNewObject->SetWPosition(x, y);
+    pNewObject->SetColliderBox(250.0f, 70.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
     pNewObject->platfCol = dynamic_cast<learning::ColliderBox*>(pNewObject->GetCollider());
     int i = 0;
     while (++i < MAX_GAME_OBJECT_COUNT) //0번째는 언제나 플레이어!
@@ -183,7 +181,7 @@ void OiiAGame::FixedUpdate()
     {
        // CreateCircleEnemy();
     }
-    else if (m_platformSpawnPos.x != 0 && m_platformSpawnPos.y != 0) {
+    else if (m_platformSpawnWPos.x != 0 && m_platformSpawnWPos.y != 0) {
         CreatePlatform();
     }
 }
@@ -221,11 +219,11 @@ void OiiAGame::CreatePlayer()
     
     int x = (GetWidth()) / 2;
     int y = (GetHeight()) / 2;
-    pNewObject->SetPosition(x, y+200); // 일단, 임의로 설정 
+    pNewObject->SetWPosition(x, y+200); // 일단, 임의로 설정 
     pNewObject->SetSpeed(0.0f); // 일단, 임의로 설정   
 
-    pNewObject->SetColliderBox(200.0f,200.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
-    pNewObject->SetDetector(300);
+    pNewObject->SetColliderBox(170.0f,170.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
+    pNewObject->SetDetector(800);
 
     pNewObject->SetBitmapInfo(m_pPlayerBitmapInfo);
     m_GameObjectPtrTable[0] = pNewObject;
@@ -239,14 +237,13 @@ void OiiAGame::CreatePlatform()
 
     pNewObject->SetName("Platform");
 
-    float x = m_platformSpawnPos.x;
-    float y = m_platformSpawnPos.y;
-    m_platformSpawnPos = { 0, 0 };
+    float x = m_platformSpawnWPos.x;
+    float y = m_platformSpawnWPos.y;
+    m_platformSpawnWPos = { 0, 0 };
+    
+    pNewObject->SetWPosition(x, y); 
 
-    pNewObject->SetPosition(x, y);
-    pNewObject->SetSpeed(1.0f); // 일단, 임의로 설정   
-
-    pNewObject->SetColliderBox(100.0f, 30.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
+    pNewObject->SetColliderBox(250.0f, 70.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
     pNewObject->platfCol = dynamic_cast<learning::ColliderBox*>(pNewObject->GetCollider());
     int i = 0;
     while (++i < MAX_GAME_OBJECT_COUNT) //0번째는 언제나 플레이어!
@@ -280,7 +277,7 @@ Vector2f OiiAGame::GetBoxDir(learning::Collider* thisBox, learning::Collider* ta
 
 void OiiAGame::UpdateWholeIntersect() {
     static Player* pPlayer = GetPlayer();
-    Vector2f playerPos = pPlayer->GetPosition();
+    Vector2f playerPos = pPlayer->GetWPosition();
     auto playerCollider = pPlayer->GetCollider();
     auto playerDetector = pPlayer->GetDetector();
 
@@ -300,29 +297,32 @@ void OiiAGame::UpdateWholeIntersect() {
         if (target == nullptr) break;
 
         learning::Collider* targetCollider = target->GetCollider();
-
-        Platform* tempPlatform = dynamic_cast<Platform*>(target);
-        //Enemy* tempEnemy = dynamic_cast<Enemy*>(target);
-
         //플레이어 감지 범위에 들어오지 않으면 충돌 처리 x 
         if (!playerDetector->IsIntersect(targetCollider)) {
             ++j;
             continue;
-        }
+        }    
 
         if (playerCollider->IsIntersect(targetCollider)) {
+
+            Platform* tempPlatform = dynamic_cast<Platform*>(target);
+            //Enemy* tempEnemy = dynamic_cast<Enemy*>(target);
             //충돌한게 플랫폼일 때 
             if (tempPlatform != nullptr) {
                 auto pCollider = dynamic_cast<learning::ColliderBox*>(pPlayer->GetCollider());
                 tempPlatform->isPlatformDetected = false;
-
                 //사각형과 플레이어의 위치 검사
                 //플레이어의 밑이 플랫폼의 가장 위 보다 클 때만 밀어내기 적용
+                //빠르게 떨어지고 있다면 일단 멈추기
+                if (pPlayer->GetSpeed() <= -0.8f) {
+                    pPlayer->ZeroReset();
+                }
+                //플레이어가 위에 있다면
                 if (pCollider->IsAbove(targetCollider)) {
                     tempPlatform->isPlatformDetected = true;
                 }
-
-                if (tempPlatform->isPlatformDetected) {
+                //밀어내기를 위한 정보 넘기기
+                if (tempPlatform->isPlatformDetected ) {    
                     playerCollider->isPlayerIntersect = true;
                     targetCollider->isPlayerIntersect = true;
                     //플랫폼에 플레이어 정보 넘기기
@@ -332,7 +332,7 @@ void OiiAGame::UpdateWholeIntersect() {
             }
         }
         //else if(tempEnemy != nullptr){}
-        tempPlatform = nullptr;
+
         ++j;
     }
 }
@@ -400,7 +400,7 @@ void OiiAGame::UpdatePlayerInfo()
 //    static GameObject* pPlayer = GetPlayer();
 //    assert(pPlayer != nullptr);
 //
-//    const Vector2f playerPos = pPlayer->GetPosition();
+//    const Vector2f playerPos = pPlayer->GetWPosition();
 //    learning::ColliderCircle* playerCollider = dynamic_cast<ColliderCircle*>(pPlayer->GetCollider());
 //    assert(playerCollider != nullptr);
 //
@@ -415,7 +415,7 @@ void OiiAGame::UpdatePlayerInfo()
 //        if (enemyCollider == nullptr)
 //            continue;
 //
-//        Vector2f enemyPos = enemy->GetPosition();
+//        Vector2f enemyPos = enemy->GetWPosition();
 //        //적으로 부터 플레이어의 방향 얻기
 //        Vector2f chaseDir = playerPos - enemyPos;
 //        float chaseDirLength = chaseDir.Length();
@@ -440,7 +440,7 @@ void OiiAGame::UpdatePlayerInfo()
 //            float pushLeng = (playerCollider->radius + enemyCollider->radius) - chaseDirLength;
 //            // enemy 에서 플레이어 반대 방향으로 겹친 거리의 절반 만큼 이동한 위치
 //            Vector2f pushedPos = (enemyPos - (chaseDir * pushLeng / 2));
-//            enemy->SetPosition(pushedPos.x, pushedPos.y);
+//            enemy->SetWPosition(pushedPos.x, pushedPos.y);
 //        }
 //
 //        // 적끼리의 충돌이 없다면 넘어가기
@@ -463,7 +463,7 @@ void OiiAGame::UpdatePlayerInfo()
 //            if (!targetEnemyCollider->isEnemyIntersect)
 //                continue;
 //
-//            Vector2f targetPos = targetEnemy->GetPosition();
+//            Vector2f targetPos = targetEnemy->GetWPosition();
 //            Vector2f pushDir = targetPos - nowPos;
 //            float pushDirLength = pushDir.Length();
 //
@@ -480,7 +480,7 @@ void OiiAGame::UpdatePlayerInfo()
 //                continue;
 //
 //            targetPos = targetPos + (pushDir * pushLeng);
-//            targetEnemy->SetPosition(targetPos.x, targetPos.y);
+//            targetEnemy->SetWPosition(targetPos.x, targetPos.y);
 //        }
 //    }
 //}
@@ -538,8 +538,10 @@ void OiiAGame::OnLButtonUp(int x, int y) {
 
 void OiiAGame::OnRButtonDown(int x, int y)
 {
-    m_platformSpawnPos.x = x;
-    m_platformSpawnPos.y = y;
+    Vector2f caPos = render->GetCameraPos();  
+    //윈도우 에서 가져오는 좌표는 윈도우 크기에 국한되어 있다.
+    m_platformSpawnWPos.x = x+caPos.x;
+    m_platformSpawnWPos.y = y + caPos.y;
 }
 
 void OiiAGame::OnMButtonDown(int x, int y)

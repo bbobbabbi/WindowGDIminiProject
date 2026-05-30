@@ -11,7 +11,7 @@
 learning::Vector2f Player::GetUpDir(){
 	
 
-    return (m_pos + learning::Vector2f(0, -1) - m_pos).Normalized();
+    return (m_Wpos + learning::Vector2f(0, -1) - m_Wpos).Normalized();
 }
 
 
@@ -19,24 +19,25 @@ void Player::Move(float deltaTime) {
 	m_speed += (accel - Gravity) * deltaTime; 
 
 	if (m_speed > MaxSpeed) { m_speed = MaxSpeed; }
-
+	if (m_speed < MinSpeed) { m_speed = MinSpeed; }
 	float distance = m_speed * deltaTime; 
 	
 	if (m_dir.y == 0) m_dir = learning::Vector2f(0,-1);
-	m_pos += m_dir * distance;
+	m_Wpos += m_dir * distance;
 }
 
 void Player::Update(float deltaTime)
-{
+{   
 	Move(deltaTime);
 	UpdateFrame(deltaTime,m_speed);
 	if (myCollider)
 	{
-		myCollider->center = m_pos;
+		myCollider->center = m_Wpos;
 	}
 	if (detector) {
-		detector->center = m_pos;
+		detector->center = m_Wpos;
 	}
+	std::cout << accel << "   " << m_speed << std::endl;
 }
 
 void Player::Accelat(float deltaTime) {
@@ -48,7 +49,7 @@ void Player::Accelat(float deltaTime) {
 	{
 		accel = MaxAccel;
 	}
-	std::cout << accel <<"   "<< m_speed << std::endl;
+
 }
 
 void Player::DeAccelat(float deltaTime) {
@@ -58,6 +59,10 @@ void Player::DeAccelat(float deltaTime) {
 	{
 		accel = 0.0f;
 	}
+}
+void Player::ZeroReset() {
+	accel = 0;
+	m_speed = 0;
 }
 
 void Player::SetDetector(float radius)
@@ -71,7 +76,7 @@ void Player::SetDetector(float radius)
 	learning::ColliderCircle* circleP = new learning::ColliderCircle;
 	detector = dynamic_cast<learning::ColliderCircle*>(circleP);
 
-	circleP->center = m_pos;
+	circleP->center = m_Wpos;
 	circleP->radius = radius;
 }
 
@@ -99,26 +104,16 @@ void Player::SetBitmapInfo(renderHelp::BitmapInfo* bitmapInfo) {
 void Player::Render(MyRender& render) {
 	render.DrawCollider(myCollider);
 	render.DrawCollider(detector);
-	render.DrawBitmap(m_pBitmapInfo,m_width,m_height,m_pos,m_frameXY,m_frameIndex,m_frameWidth,m_frameHeight);
+	render.DrawBitmap(m_pBitmapInfo,m_width,m_height,m_Cpos,m_frameXY,m_frameIndex,m_frameWidth,m_frameHeight);
 }
 
 // 가져오는 그림 처리 
 void Player::UpdateFrame(float deltaTime, float speed)
 {
-	const float minSpeed = -0.2f;
-	const float maxSpeed = 0.5f;        // 최고 속도 기준으로 수정
 
-	const float maxFrameDuration = 50.f; // 느릴 때
-	const float minFrameDuration = 10.f; // 빠를 때
+	const float maxFrameDuration = 100.f; // 느릴 때
+	const float minFrameDuration = 30.f; // 빠를 때
 
-	float t = (speed - minSpeed) / (maxSpeed - minSpeed);
-
-	if (t < 0.0f)
-		t = 0.0f;
-	else if (t > 1.0f)
-		t = 1.0f;
-
-	m_frameDuration = maxFrameDuration + (minFrameDuration - maxFrameDuration) * t;
 
 	if (!isMouseDown || speed <= -0.3f)
 	{
@@ -126,17 +121,24 @@ void Player::UpdateFrame(float deltaTime, float speed)
 		m_frameTime = 0.0f;
 		return;
 	}
+	
+	float t = (speed) / (MaxSpeed);
 
+	if (t < 0.0f)
+		t = 0.0f;
+	else if (t > 1.0f)
+		t = 1.0f;
+	
+	m_frameDuration = maxFrameDuration + (minFrameDuration - maxFrameDuration) * t;
 	m_frameTime += deltaTime;
 
 	if (isMouseDown && m_frameTime >= m_frameDuration)
 	{
 		m_frameTime = 0.0f;
 
-		int localFrame =
-			(m_frameIndex - m_startframeIndex + 1) % m_frameCount;
+		int localFrame =(m_frameIndex - m_startframeIndex + 1) % m_frameCount;
 
-		m_frameIndex = m_startframeIndex + localFrame;
+		m_frameIndex = 1 + localFrame;
 	}
 }
 

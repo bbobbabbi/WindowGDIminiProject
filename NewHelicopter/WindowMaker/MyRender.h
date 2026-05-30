@@ -36,6 +36,7 @@ public:
 	HBITMAP m_hBackBitmap = nullptr;
 	HBITMAP m_hDefaultBitmap = nullptr;
 	int m_width, m_height;
+	renderHelp::Camera m_camera;
 	static MyRender* Instance;
 	
 public:
@@ -46,7 +47,7 @@ public:
 	void DrawCircleCollider(learning::ColliderCircle* col);
 	void DrawBoxCollider(learning::ColliderBox* col);
 	void OnResize(int width, int height);
-
-	void DrawBitmap(renderHelp::BitmapInfo* m_pBitmapInfo, float m_width, float m_height, learning::Vector2f m_pos, FrameFPos* m_frameXY, int m_frameIndex, int m_frameWidth, int m_frameHeight);
+	void DrawBitmap(renderHelp::BitmapInfo* m_pBitmapInfo, float m_width, float m_height, learning::Vector2f m_Wpos, FrameFPos* m_frameXY, int m_frameIndex, int m_frameWidth, int m_frameHeight);
 	void OnClose(HWND hd);
+	learning::Vector2f GetCameraPos();
 };

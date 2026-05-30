@@ -8,7 +8,7 @@
 #include "iostream"
 
 void Platform::Move(float deltaTime) {
-	m_pos = m_pos;
+	m_Wpos = m_Wpos;
 }
 
 void Platform::Update (float deltatime) {
@@ -28,8 +28,8 @@ void Platform::Update (float deltatime) {
         return;
     }
 
-    learning::Vector2f pPos = bumpedPlayer->GetPosition();
-    learning::Vector2f tPos = m_pos;
+    learning::Vector2f pPos = bumpedPlayer->GetWPosition();
+    learning::Vector2f tPos = m_Wpos;
 
     float playerBottom = pPos.y + pb->halfSize.y;
     float platformTop = tPos.y - tb->halfSize.y;
@@ -38,11 +38,11 @@ void Platform::Update (float deltatime) {
 
     if (penetration > 0.0f)
     {
-        bumpedPlayer->SetPosition(pPos.x, pPos.y - penetration);
-        bumpedPlayer->SetSpeed(0);
-    }
-    
+        bumpedPlayer->ZeroReset();
+        bumpedPlayer->SetWPosition(pPos.x, pPos.y - penetration);
+    }   
 }
+
 
 Platform::~Platform() {
 	bumpedPlayer = nullptr;

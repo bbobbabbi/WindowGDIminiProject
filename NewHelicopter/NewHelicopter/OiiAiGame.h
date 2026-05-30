@@ -83,7 +83,8 @@ private:
 
     MOUSE_POS m_mousClickPos = { 0, 0 };
     MOUSE_POS m_CirEnemySpawnPos = { 0, 0 };
-    MOUSE_POS m_platformSpawnPos = { 0, 0 };
+    MOUSE_POS m_platformSpawnWPos = { 0, 0 };
+    MOUSE_POS m_platformSpawnCPos = { 0, 0 };
 
 
     renderHelp::BitmapInfo* m_pPlayerBitmapInfo = nullptr;
