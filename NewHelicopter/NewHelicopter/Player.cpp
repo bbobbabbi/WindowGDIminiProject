@@ -23,6 +23,7 @@ void Player::Move(float deltaTime) {
 	float distance = m_speed * deltaTime; 
 	
 	if (m_dir.y == 0) m_dir = learning::Vector2f(0,-1);
+	m_prevWpos = m_Wpos;
 	m_Wpos += m_dir * distance;
 }
 
@@ -33,7 +34,7 @@ void Player::Update(float deltaTime)
 	if (myCollider)
 	{
 		myCollider->center = m_Wpos;
-	}
+	}          
 	if (detector) {
 		detector->center = m_Wpos;
 	}
@@ -140,6 +141,11 @@ void Player::UpdateFrame(float deltaTime, float speed)
 
 		m_frameIndex = 1 + localFrame;
 	}
+}
+
+
+learning::Vector2f Player::GetPrevWPosition() { 
+	return m_prevWpos; 
 }
 
 Player::~Player() {

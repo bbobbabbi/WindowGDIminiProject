@@ -278,7 +278,7 @@ Vector2f OiiAGame::GetBoxDir(learning::Collider* thisBox, learning::Collider* ta
 void OiiAGame::UpdateWholeIntersect() {
     static Player* pPlayer = GetPlayer();
     Vector2f playerPos = pPlayer->GetWPosition();
-    auto playerCollider = pPlayer->GetCollider();
+    ColliderBox* playerCollider = dynamic_cast<ColliderBox*>(pPlayer->GetCollider());
     auto playerDetector = pPlayer->GetDetector();
 
     //전체 초기화
@@ -303,33 +303,12 @@ void OiiAGame::UpdateWholeIntersect() {
             continue;
         }    
 
-        if (playerCollider->IsIntersect(targetCollider)) {
-
-            Platform* tempPlatform = dynamic_cast<Platform*>(target);
-            //Enemy* tempEnemy = dynamic_cast<Enemy*>(target);
-            //충돌한게 플랫폼일 때 
-            if (tempPlatform != nullptr) {
-                auto pCollider = dynamic_cast<learning::ColliderBox*>(pPlayer->GetCollider());
-                tempPlatform->isPlatformDetected = false;
-                //사각형과 플레이어의 위치 검사
-                //플레이어의 밑이 플랫폼의 가장 위 보다 클 때만 밀어내기 적용
-                //빠르게 떨어지고 있다면 일단 멈추기
-                if (pPlayer->GetSpeed() <= -0.8f) {
-                    pPlayer->ZeroReset();
-                }
-                //플레이어가 위에 있다면
-                if (pCollider->IsAbove(targetCollider)) {
-                    tempPlatform->isPlatformDetected = true;
-                }
-                //밀어내기를 위한 정보 넘기기
-                if (tempPlatform->isPlatformDetected ) {    
-                    playerCollider->isPlayerIntersect = true;
-                    targetCollider->isPlayerIntersect = true;
-                    //플랫폼에 플레이어 정보 넘기기
-                    tempPlatform->bumpedPlayer = pPlayer;
-                    tempPlatform->playerfCol = pCollider;
-                }
-            }
+        Platform* tempPlatform = dynamic_cast<Platform*>(target);
+        // 감지된 것이 플랫폼이라면 , 플랫폼을 통과할게 맞다면
+        if (tempPlatform!=nullptr && tempPlatform->CheckIsAbove(pPlayer,playerCollider)) {
+            playerCollider->isPlayerIntersect = true;
+            targetCollider->isPlayerIntersect = true;
+            tempPlatform->Push();
         }
         //else if(tempEnemy != nullptr){}
 

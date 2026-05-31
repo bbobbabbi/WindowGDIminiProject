@@ -2,6 +2,7 @@
 
 #include "NzWndBase.h"
 #include "Player.h"
+#include "Platform.h"
 #include <wrl/client.h>
 
 
@@ -53,7 +54,12 @@ private:
     void UpdateWholeIntersect();
 
     learning::Vector2f GetBoxDir(learning::Collider* thisBox, learning::Collider* targetBox);
-
+    bool IsLandingOnPlatform(
+        Player* player,
+        learning::ColliderBox* playerBox,
+        Platform* platform,
+        learning::ColliderBox* platformBox
+    );
     Player* GetPlayer() const { return (Player*)m_GameObjectPtrTable[0]; }
 
 private:

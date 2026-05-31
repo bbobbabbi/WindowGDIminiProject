@@ -21,6 +21,7 @@ public:
     void SetDetector(float radius);
     void ZeroReset();
     learning::ColliderCircle* GetDetector();
+    learning::Vector2f GetPrevWPosition();
     void SetBitmapInfo(renderHelp::BitmapInfo * bitmapInfo);
     // 가져오는 그림 처리 
     void UpdateFrame(float deltaTime, float speed);
@@ -30,11 +31,13 @@ private:
     float accel=0;
     float elapsedTime = 0.0f;
     const float MaxSpeed = 2.f;
-    const float MinSpeed = -3.f;
+    const float MinSpeed = -4.f;
     const float MaxAccel= 0.002f;
     const float Gravity= 0.0015f;
     float m_verticalSpeed = 0.0f;
     learning::ColliderCircle* detector = nullptr;
+
+    learning::Vector2f m_prevWpos;
 
     //윈도우에 나올 사이즈
     int m_width = 200;
