@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "RenderHelp.h"
+#include <vector>
 
 class GameObjectBase;
 namespace learning {
@@ -41,9 +42,9 @@ public:
 	
 public:
 	bool InitMyRender(HWND hd);
-	void Render(int drawCount, GameObjectBase** drawTargets);
+	void Render(int drawCount, std::vector<GameObjectBase*> drawTargets);
 	void DrawCollider(learning::Collider* myCollider);
-	void DrawGameObject(int drawCount, GameObjectBase** drawTargets);
+	void DrawGameObject(int drawCount, std::vector<GameObjectBase*> drawTargets);
 	void DrawCircleCollider(learning::ColliderCircle* col);
 	void DrawBoxCollider(learning::ColliderBox* col);
 	void OnResize(int width, int height);

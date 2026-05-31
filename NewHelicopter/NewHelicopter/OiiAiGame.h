@@ -3,6 +3,7 @@
 #include "NzWndBase.h"
 #include "Player.h"
 #include "Platform.h"
+#include "mapManager.h"
 #include <wrl/client.h>
 
 
@@ -30,7 +31,9 @@ public:
     void Run();
     void Finalize();
 
-
+    Platform* CreatePlatform(float x, float y);
+    //mapManagaer에서 호출
+    void DestroyObject(Platform*);
 private:
     void Update();
     void Render();
@@ -48,22 +51,16 @@ private:
     void LogicUpdate();
 
     void CreatePlayer();
-    void CreatePlatform();
     void UpdatePlayerInfo();
     //void UpdateEnemyInfo();
     void UpdateWholeIntersect();
-
+    void UpddateMapInfo();
     learning::Vector2f GetBoxDir(learning::Collider* thisBox, learning::Collider* targetBox);
-    bool IsLandingOnPlatform(
-        Player* player,
-        learning::ColliderBox* playerBox,
-        Platform* platform,
-        learning::ColliderBox* platformBox
-    );
+
     Player* GetPlayer() const { return (Player*)m_GameObjectPtrTable[0]; }
 
 private:
-
+    MapManager* m_mapManager;
     MyRender* render;
     // [CHECK] #8. 게임 타이머를 사용하여 프레임을 관리하는 예시.F
     GameTimer* m_pGameTimer = nullptr;
@@ -71,7 +68,7 @@ private:
     float m_fFrameCount = 0.0f;
 
     // [CHECK] #8. 게임 오브젝트를 관리하는 컨테이너.
-    GameObjectBase** m_GameObjectPtrTable = nullptr;
+    std::vector<GameObjectBase*> m_GameObjectPtrTable;
 
     struct MOUSE_POS
     {

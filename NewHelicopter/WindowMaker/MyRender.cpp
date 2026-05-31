@@ -4,7 +4,7 @@
 #include "renderHelp.h"
 #include "Utillity.h"
 #include "GameObject.h"
-
+#include <vector>
 
 MyRender* MyRender::Instance = nullptr;
 
@@ -25,11 +25,12 @@ bool MyRender::InitMyRender(HWND hd) {
 	else return true;
 }
 
-void MyRender::Render(int drawCount, GameObjectBase** drawTargets) {
+void MyRender::Render(int drawCount, std::vector<GameObjectBase*> drawTargets) {
 	::PatBlt(m_hBackDC, 0, 0, m_width, m_height, WHITENESS);
 
 	//플레이어와 같은 위치를 잡는 카메라
 	//모든 그리기는 오브젝트의 월드좌표 - 카메라 좌표를 기준으로 그려짐
+
 	m_camera.Follow(drawTargets[0]->GetWPosition(),m_width,m_height);
 
 	//메모리 DC에 그리기
@@ -42,7 +43,7 @@ void MyRender::Render(int drawCount, GameObjectBase** drawTargets) {
 	BitBlt(m_hFrontDC, 0, 0, m_width, m_height, m_hBackDC, 0, 0, SRCCOPY);
 }
 
-void MyRender::DrawGameObject(int drawCount, GameObjectBase** drawTargets){
+void MyRender::DrawGameObject(int drawCount, std::vector<GameObjectBase*> drawTargets){
 	learning::Vector2f pos;
 	for (int i = 0; i < drawCount; i++)
 	{

@@ -25,6 +25,12 @@ void Player::Move(float deltaTime) {
 	if (m_dir.y == 0) m_dir = learning::Vector2f(0,-1);
 	m_prevWpos = m_Wpos;
 	m_Wpos += m_dir * distance;
+	if (m_Wpos.x < -4000) {
+		m_Wpos.x = -4000;
+	}
+	if (m_Wpos.x > 4000) {
+		m_Wpos.x = 4000;
+	}
 }
 
 void Player::Update(float deltaTime)
@@ -38,7 +44,7 @@ void Player::Update(float deltaTime)
 	if (detector) {
 		detector->center = m_Wpos;
 	}
-	std::cout << accel << "   " << m_speed << std::endl;
+	std::cout << accel << "   " << m_speed <<"   "<< m_dir.x<<":"<<m_dir.y << std::endl;
 }
 
 void Player::Accelat(float deltaTime) {

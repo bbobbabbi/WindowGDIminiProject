@@ -125,12 +125,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mapManager.cpp" />
     <ClCompile Include="OiiAiGame.cpp" />
     <ClCompile Include="platform.cpp" />
     <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externVer.h" />
+    <ClInclude Include="mapManager.h" />
     <ClInclude Include="OiiAiGame.h" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="Player.h" />

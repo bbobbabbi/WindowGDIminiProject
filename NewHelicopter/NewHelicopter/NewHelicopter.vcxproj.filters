@@ -33,6 +33,9 @@
     <ClCompile Include="Player.cpp">
       <Filter>소스 파일\Object</Filter>
     </ClCompile>
+    <ClCompile Include="mapManager.cpp">
+      <Filter>소스 파일\Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OiiAiGame.h">
@@ -46,6 +49,9 @@
     </ClInclude>
     <ClInclude Include="externVer.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="mapManager.h">
+      <Filter>헤더 파일\Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

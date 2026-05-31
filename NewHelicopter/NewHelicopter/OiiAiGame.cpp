@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "platform.h"
 #include "RenderHelp.h"
+#include "mapManager.h"
 #include "externVer.h"
 #include <iostream>
 #include <assert.h>
@@ -17,6 +18,9 @@ using namespace learning;
 constexpr int MAX_GAME_OBJECT_COUNT = 1000;
 bool isMouseDown = false;
 
+const float PLATFORM_W = 250.0f;
+const float PLATFORM_H = 70.0f;
+
 class D2DRenderSystem
 {
 public:
@@ -24,6 +28,7 @@ public:
 
 bool OiiAGame::Initialize()
 {
+    m_mapManager = new MapManager();
     m_pGameTimer = new GameTimer();
     m_pGameTimer->Reset();
     render = new MyRender();
@@ -38,45 +43,12 @@ bool OiiAGame::Initialize()
 
     render->InitMyRender(m_hWnd);
 
-    m_GameObjectPtrTable = new GameObjectBase * [MAX_GAME_OBJECT_COUNT];
+    //m_GameObjectPtrTable.resize(MAX_GAME_OBJECT_COUNT);
 
-    for (int i = 0; i < MAX_GAME_OBJECT_COUNT; ++i)
+    for (int i = 0; i < m_GameObjectPtrTable.size() /*MAX_GAME_OBJECT_COUNT*/; ++i)
     {
         m_GameObjectPtrTable[i] = nullptr;
     }
-
-    //////////////////////////////////////////////////
-    //////////////////////////////////////////////////
-    //디버깅 용 플랫폼 하나 초기화
-    Platform* pNewObject = new Platform(ObjectType::PLATFORM);
-
-    pNewObject->SetName("Platform");
-
-    int x = (GetWidth()) / 2;
-    int y = (GetHeight())-15;
-    m_platformSpawnWPos = { 0, 0 };
-
-    pNewObject->SetWPosition(x, y);
-    pNewObject->SetColliderBox(250.0f, 70.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
-    pNewObject->platfCol = dynamic_cast<learning::ColliderBox*>(pNewObject->GetCollider());
-    int i = 0;
-    while (++i < MAX_GAME_OBJECT_COUNT) //0번째는 언제나 플레이어!
-    {
-        if (nullptr == m_GameObjectPtrTable[i])
-        {
-            m_GameObjectPtrTable[i] = pNewObject;
-            break;
-        }
-    }
-
-    if (i == MAX_GAME_OBJECT_COUNT)
-    {
-        // 게임 오브젝트 테이블이 가득 찼습니다.
-        delete pNewObject;
-        pNewObject = nullptr;
-    }
-    //////////////////////////////////////////////////
-    //////////////////////////////////////////////////
 
     #pragma region resource
     //주의 ! IDE 에서 인지하는 현재 경로와 실제 실행 파일을 ㅏ로 실행했을 때의 경로 기준이 달라짐.
@@ -84,8 +56,10 @@ bool OiiAGame::Initialize()
         m_pEnemyBitmapInfo = renderHelp::CreateBitmapInfo(L"../Resource/rat-dance_200x200_120f_sheet.png");
     #pragma endregion
 
-
+        //항상 배열 0 번에 들어갈 수 있도록 생성 보장
         CreatePlayer();
+
+        m_mapManager->Init(this);
 
     return true;
 }
@@ -131,20 +105,26 @@ void OiiAGame::Finalize()
 {
     delete m_pGameTimer;
     delete render;
+    delete m_mapManager;
 
     m_pGameTimer = nullptr;
 
-    if (m_GameObjectPtrTable)
+    if (m_GameObjectPtrTable.size() == 0)
     {
-        for (int i = 0; i < MAX_GAME_OBJECT_COUNT; ++i)
+        for (int i = 0; i < m_GameObjectPtrTable.size()/*MAX_GAME_OBJECT_COUNT*/; ++i)
         {
-            if (m_GameObjectPtrTable[i])
+
+                if (!m_GameObjectPtrTable.empty())
+                {
+                    delete m_GameObjectPtrTable.back();
+                    m_GameObjectPtrTable.pop_back();
+                }
+         /*   if (m_GameObjectPtrTable[i])
             {
                 delete m_GameObjectPtrTable[i];
                 m_GameObjectPtrTable[i] = nullptr;
-            }
+            }*/
         }
-        delete m_GameObjectPtrTable;
     }
     __super::Destroy();
 }
@@ -182,16 +162,18 @@ void OiiAGame::FixedUpdate()
        // CreateCircleEnemy();
     }
     else if (m_platformSpawnWPos.x != 0 && m_platformSpawnWPos.y != 0) {
-        CreatePlatform();
+       
     }
 }
 
 void OiiAGame::LogicUpdate()
 {
+    std::cout << m_GameObjectPtrTable.size() << std::endl;
      UpdatePlayerInfo();
      UpdateWholeIntersect();
+     UpddateMapInfo();
 
-    for (int i = 0; i < MAX_GAME_OBJECT_COUNT; ++i)
+    for (int i = 0; i <m_GameObjectPtrTable.size(); ++i)
     {
         if (m_GameObjectPtrTable[i])
         {
@@ -203,15 +185,27 @@ void OiiAGame::LogicUpdate()
     }
 }
 
+// 수정 바람
+void OiiAGame::UpddateMapInfo() {
+    learning::Vector2f playerPos = GetPlayer()->GetWPosition();
+
+    learning::Vector2f playerDir;
+    playerDir.x = GetPlayer()->GetDirection().x; // -1 ~ 1
+    playerDir.y = -1.0f;
+
+    m_mapManager->Update(playerPos, playerDir);
+}
+
 void OiiAGame::Render()
 {
-    render->Render(MAX_GAME_OBJECT_COUNT, m_GameObjectPtrTable);
+    render->Render(/*MAX_GAME_OBJECT_COUNT*/
+        m_GameObjectPtrTable.size(), m_GameObjectPtrTable);
 }
 
 
 void OiiAGame::CreatePlayer()
 {
-    assert(m_GameObjectPtrTable[0] == nullptr && "Player object already exists!");
+    //assert(m_GameObjectPtrTable[0] == nullptr && "Player object already exists!");
 
     Player* pNewObject = new Player(ObjectType::PLAYER);
 
@@ -226,34 +220,37 @@ void OiiAGame::CreatePlayer()
     pNewObject->SetDetector(800);
 
     pNewObject->SetBitmapInfo(m_pPlayerBitmapInfo);
-    m_GameObjectPtrTable[0] = pNewObject;
+
+    m_GameObjectPtrTable.push_back(pNewObject);
+//    m_GameObjectPtrTable[0] = pNewObject;
 }
 
 
-
-void OiiAGame::CreatePlatform()
+Platform* OiiAGame::CreatePlatform(float x, float y)
 {
     Platform* pNewObject = new Platform(ObjectType::PLATFORM);
 
     pNewObject->SetName("Platform");
 
-    float x = m_platformSpawnWPos.x;
-    float y = m_platformSpawnWPos.y;
     m_platformSpawnWPos = { 0, 0 };
-    
-    pNewObject->SetWPosition(x, y); 
 
-    pNewObject->SetColliderBox(250.0f, 70.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
+    pNewObject->SetWPosition(x, y);
+
+    pNewObject->SetColliderBox(PLATFORM_W, PLATFORM_H); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
     pNewObject->platfCol = dynamic_cast<learning::ColliderBox*>(pNewObject->GetCollider());
     int i = 0;
-    while (++i < MAX_GAME_OBJECT_COUNT) //0번째는 언제나 플레이어!
+
+    m_GameObjectPtrTable.push_back(pNewObject);
+
+    /*  while (++i < MAX_GAME_OBJECT_COUNT) //0번째는 언제나 플레이어!
     {
-        if (nullptr == m_GameObjectPtrTable[i])
+      if (nullptr == m_GameObjectPtrTable[i])
         {
             m_GameObjectPtrTable[i] = pNewObject;
             break;
         }
     }
+    */
 
     if (i == MAX_GAME_OBJECT_COUNT)
     {
@@ -261,10 +258,23 @@ void OiiAGame::CreatePlatform()
         delete pNewObject;
         pNewObject = nullptr;
     }
+    return pNewObject;
 }
 
 
-
+void OiiAGame::DestroyObject(Platform* plat) {
+    int i = 0;
+    while (++i < m_GameObjectPtrTable.size()) //0번째는 언제나 플레이어!
+    {
+        if (plat == m_GameObjectPtrTable[i])
+        {
+            delete plat;
+            m_GameObjectPtrTable[i] = nullptr;
+            m_GameObjectPtrTable.erase(m_GameObjectPtrTable.begin() + i);
+            break;
+        }
+    }
+}
 
 Vector2f OiiAGame::GetBoxDir(learning::Collider* thisBox, learning::Collider* targetBox) {
     auto a = dynamic_cast<ColliderBox*>(thisBox);
@@ -282,7 +292,7 @@ void OiiAGame::UpdateWholeIntersect() {
     auto playerDetector = pPlayer->GetDetector();
 
     //전체 초기화
-    for (int i = 0; i < MAX_GAME_OBJECT_COUNT; i++) {
+    for (int i = 0; i <m_GameObjectPtrTable.size(); i++) {
         GameObjectBase* target = m_GameObjectPtrTable[i];
         if (target == nullptr) break;
         target->GetCollider()->isPlayerIntersect = false;
@@ -292,7 +302,7 @@ void OiiAGame::UpdateWholeIntersect() {
 
     //오브젝트 캐릭터 충돌 처리 모음
     int j = 1;
-    while (j < MAX_GAME_OBJECT_COUNT) {
+    while (j < m_GameObjectPtrTable.size()) {
         GameObjectBase* target = m_GameObjectPtrTable[j];
         if (target == nullptr) break;
 
